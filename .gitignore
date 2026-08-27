@@ -1,18 +1,61 @@
-# Build and Release Folders
-bin-debug/
-bin-release/
-[Oo]bj/
-[Bb]in/
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
 
-# Other files and folders
-.settings/
+# Environment variables
+.env
+.env.*
+!.env.example
 
-# Executables
-*.swf
-*.air
-*.ipa
-*.apk
+# IDE
+.vscode/
+.idea/
 
-# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
-# should NOT be excluded as they contain compiler settings and other important
-# information for Eclipse / Flash Builder.
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.log
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+
+# Kubernetes
+*.secret.yaml
+
+# Azure
+.azure/
+
+# Databricks / Fabric
+.databricks/
+.fabric/
+
+# Test / coverage
+.coverage
+htmlcov/
+coverage.xml
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Secrets
+*.pem
+*.key
+credentials.json
+secrets.json
