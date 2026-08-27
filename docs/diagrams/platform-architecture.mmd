@@ -1,0 +1,41 @@
+flowchart LR
+
+    A[Web / Mobile / POS] --> B[Event Generator]
+
+    B --> C[Azure Event Hubs]
+
+    C --> D[AKS]
+
+    D --> D1[Inventory Service]
+    D --> D2[Pricing Service]
+    D --> D3[Fraud Service]
+
+    C --> E[Fabric Eventstream]
+
+    E --> F[Bronze Delta Lake]
+
+    F --> G[Silver Delta Lake]
+
+    G --> H[Delta CDF]
+
+    H --> I[Gold Data Products]
+
+    I --> J[Fabric Semantic Model]
+
+    J --> K[Power BI]
+
+    L[GitHub] --> M[GitHub Actions]
+
+    M --> N[Terraform]
+    M --> O[Docker / ACR]
+    M --> P[AKS Deployment]
+    M --> Q[Fabric Deployment]
+
+    R[Azure Monitor] --> D
+    R --> C
+    R --> F
+
+    S[Prometheus] --> D
+    S --> T[Grafana]
+
+    U[Application Insights] --> T
