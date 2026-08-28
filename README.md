@@ -45,3 +45,27 @@ Semantic Model
       |
       v
 Power BI
+
+```
+## Development Standards
+
+The project follows automated Python code-quality standards.
+
+### Tooling
+
+- Ruff — linting and formatting
+- Pytest — unit testing
+- Pytest-Cov — test coverage
+- Pre-commit — automated quality checks
+- Make — developer commands
+
+### Local Setup
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+
+pip install -r requirements-dev.txt
+
+pre-commit install
+```

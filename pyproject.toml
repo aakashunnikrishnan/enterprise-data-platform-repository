@@ -1,0 +1,49 @@
+[project]
+name = "enterprise-realtime-data-platform"
+version = "0.1.0"
+description = "Cloud-native real-time data platform using Azure, Microsoft Fabric, Kafka, AKS and Delta Lake"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+    "B",
+    "UP"
+]
+
+ignore = [
+    "E501"
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers"
+
+[tool.coverage.run]
+branch = true
+source = [
+    "producer",
+    "microservices"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:"
+]
