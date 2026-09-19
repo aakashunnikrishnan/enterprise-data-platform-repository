@@ -1,0 +1,26 @@
+services:
+  producer:
+    build:
+      context: .
+      dockerfile: docker/producer.Dockerfile
+
+    container_name: retail-event-producer
+
+    restart: unless-stopped
+
+    environment:
+      EVENTS_PER_SECOND: "5"
+      ENVIRONMENT: "dev"
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import producer"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
