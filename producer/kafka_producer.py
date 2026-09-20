@@ -22,8 +22,13 @@ class RetailKafkaProducer:
     def __init__(
         self,
         config: KafkaConfig | None = None,
+        kafka_client: Producer | None = None,
     ) -> None:
         self.config = config or KafkaConfig()
+
+        if kafka_client is not None:
+            self._producer = kafka_client
+            return
 
         self._producer = Producer(
             {
