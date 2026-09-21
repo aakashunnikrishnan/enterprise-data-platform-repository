@@ -1,0 +1,93 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "minLength": 1,
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "const": "PAYMENT_COMPLETED",
+      "default": "PAYMENT_COMPLETED",
+      "title": "Event Type",
+      "type": "string"
+    },
+    "event_time": {
+      "format": "date-time",
+      "title": "Event Time",
+      "type": "string"
+    },
+    "source": {
+      "minLength": 1,
+      "title": "Source",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "environment": {
+      "default": "dev",
+      "enum": [
+        "dev",
+        "test",
+        "staging",
+        "prod"
+      ],
+      "title": "Environment",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "1.0",
+      "minLength": 1,
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "payment_id": {
+      "minLength": 1,
+      "title": "Payment Id",
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "title": "Order Id",
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "title": "Customer Id",
+      "type": "string"
+    },
+    "amount": {
+      "exclusiveMinimum": 0,
+      "title": "Amount",
+      "type": "number"
+    },
+    "currency": {
+      "default": "INR",
+      "maxLength": 3,
+      "minLength": 3,
+      "title": "Currency",
+      "type": "string"
+    },
+    "payment_method": {
+      "minLength": 1,
+      "title": "Payment Method",
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_time",
+    "source",
+    "payment_id",
+    "order_id",
+    "customer_id",
+    "amount",
+    "payment_method"
+  ],
+  "title": "PaymentEventSchema",
+  "type": "object"
+}

@@ -1,0 +1,92 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "minLength": 1,
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "const": "CUSTOMER_ACTIVITY",
+      "default": "CUSTOMER_ACTIVITY",
+      "title": "Event Type",
+      "type": "string"
+    },
+    "event_time": {
+      "format": "date-time",
+      "title": "Event Time",
+      "type": "string"
+    },
+    "source": {
+      "minLength": 1,
+      "title": "Source",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "environment": {
+      "default": "dev",
+      "enum": [
+        "dev",
+        "test",
+        "staging",
+        "prod"
+      ],
+      "title": "Environment",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "1.0",
+      "minLength": 1,
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "activity_id": {
+      "minLength": 1,
+      "title": "Activity Id",
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "title": "Customer Id",
+      "type": "string"
+    },
+    "activity_type": {
+      "minLength": 1,
+      "title": "Activity Type",
+      "type": "string"
+    },
+    "product_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Product Id"
+    },
+    "city": {
+      "minLength": 1,
+      "title": "City",
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_time",
+    "source",
+    "activity_id",
+    "customer_id",
+    "activity_type",
+    "city"
+  ],
+  "title": "CustomerActivityEventSchema",
+  "type": "object"
+}
