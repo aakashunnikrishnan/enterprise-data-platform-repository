@@ -4,6 +4,8 @@ from collections.abc import Callable
 
 from confluent_kafka import Producer
 
+from schemas.event_schema import EventType
+
 from .kafka_config import KafkaConfig
 from .models import (
     BaseEvent,
@@ -71,26 +73,24 @@ class RetailKafkaProducer:
             separators=(",", ":"),
         ).encode("utf-8")
 
-    @staticmethod
-    def _topic_for_event(
-        event: BaseEvent,
-        config: KafkaConfig,
-    ) -> str:
-        """Map event type to Kafka topic."""
+    def _topic_for_event(self, event: BaseEvent) -> str:
+        """Return the Kafka topic for an event."""
 
-        if isinstance(event, OrderEvent):
+        config = self.config
+
+        if event.event_type == EventType.ORDER_CREATED:
             return config.topic_orders
 
-        if isinstance(event, PaymentEvent):
+        if event.event_type == EventType.PAYMENT_PROCESSED:
             return config.topic_payments
 
-        if isinstance(event, InventoryEvent):
+        if event.event_type == EventType.INVENTORY_UPDATED:
             return config.topic_inventory
 
-        if isinstance(event, CustomerActivityEvent):
+        if event.event_type == EventType.CUSTOMER_ACTIVITY:
             return config.topic_customer_activity
 
-        raise ValueError(f"Unsupported event type: {type(event).__name__}")
+        raise ValueError(f"Unsupported event type: {event.event_type}")
 
     @staticmethod
     def _key_for_event(event: BaseEvent) -> str:
@@ -117,11 +117,7 @@ class RetailKafkaProducer:
     ) -> None:
         """Publish a domain event to Kafka."""
 
-        topic = self._topic_for_event(
-            event,
-            self.config,
-        )
-
+        topic = self._topic_for_event(event)
         key = self._key_for_event(event)
 
         payload = self._serialize(event)

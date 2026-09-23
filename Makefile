@@ -23,3 +23,34 @@ check:
 	ruff check .
 	ruff format --check .
 	pytest
+
+compose-up:
+	docker compose up -d
+
+compose-down:
+	docker compose down
+
+compose-build:
+	docker compose build
+
+compose-rebuild:
+	docker compose build --no-cache
+
+compose-logs:
+	docker compose logs -f
+
+compose-ps:
+	docker compose ps
+
+kafka-topics:
+	docker compose exec kafka \
+		/opt/kafka/bin/kafka-topics.sh \
+		--bootstrap-server kafka:29092 \
+		--list
+
+test:
+	pytest -v
+
+check:
+	pre-commit run --all-files
+	pytest -v

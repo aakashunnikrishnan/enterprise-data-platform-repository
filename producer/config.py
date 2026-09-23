@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 
 
@@ -38,3 +39,31 @@ class GeneratorConfig:
 
     product_count: int = 1_000
     customer_count: int = 100_000
+
+
+@dataclass(frozen=True)
+class KafkaConfig:
+    bootstrap_servers: str = os.getenv(
+        "KAFKA_BOOTSTRAP_SERVERS",
+        "localhost:9092",
+    )
+
+    topic_orders: str = os.getenv(
+        "KAFKA_TOPIC_ORDERS",
+        "orders",
+    )
+
+    topic_payments: str = os.getenv(
+        "KAFKA_TOPIC_PAYMENTS",
+        "payments",
+    )
+
+    topic_inventory: str = os.getenv(
+        "KAFKA_TOPIC_INVENTORY",
+        "inventory",
+    )
+
+    topic_customer_activity: str = os.getenv(
+        "KAFKA_TOPIC_CUSTOMER_ACTIVITY",
+        "customer_activity",
+    )

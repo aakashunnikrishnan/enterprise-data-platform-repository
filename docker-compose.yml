@@ -1,16 +1,145 @@
 services:
-  producer:
-    build:
-      context: .
-      dockerfile: docker/producer.Dockerfile
 
-    container_name: retail-event-producer
+  kafka:
+    image: apache/kafka:4.0.0
+    container_name: retail-kafka
+    hostname: kafka
 
-    restart: unless-stopped
+    ports:
+      - "9092:9092"
 
     environment:
-      EVENTS_PER_SECOND: "5"
-      ENVIRONMENT: "dev"
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+
+      KAFKA_LISTENERS: CONTROLLER://:9093,INTERNAL://:29092,EXTERNAL://:9092
+
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+      KAFKA_NUM_PARTITIONS: 6
+
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+
+  kafka-init:
+    image: apache/kafka:4.0.0
+    container_name: retail-kafka-init
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+    entrypoint: ["/bin/bash", "-c"]
+
+    command:
+      - |
+        set -e
+
+        echo "Creating Kafka topics..."
+
+        /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:29092 \
+          --create \
+          --if-not-exists \
+          --topic orders \
+          --partitions 3 \
+          --replication-factor 1
+
+        /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:29092 \
+          --create \
+          --if-not-exists \
+          --topic payments \
+          --partitions 3 \
+          --replication-factor 1
+
+        /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:29092 \
+          --create \
+          --if-not-exists \
+          --topic inventory \
+          --partitions 3 \
+          --replication-factor 1
+
+        /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:29092 \
+          --create \
+          --if-not-exists \
+          --topic customer_activity \
+          --partitions 6 \
+          --replication-factor 1
+
+        echo "Kafka topics created."
+
+        /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:29092 \
+          --list
+
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: retail-kafka-ui
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      KAFKA_CLUSTERS_0_NAME: retail-local
+
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+
+      DYNAMIC_CONFIG_ENABLED: "true"
+
+
+  inventory:
+    build:
+      context: .
+      dockerfile: microservices/inventory/Dockerfile
+
+    container_name: inventory-service
+
+    ports:
+      - "8001:8000"
+
+    environment:
+      SERVICE_NAME: inventory-service
+      ENVIRONMENT: dev
+      LOG_LEVEL: INFO
+      LOW_STOCK_THRESHOLD: 10
 
     healthcheck:
       test:
@@ -18,9 +147,115 @@ services:
           "CMD",
           "python",
           "-c",
-          "import producer"
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
         ]
-      interval: 30s
+      interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
       start_period: 10s
+
+
+  pricing:
+    build:
+      context: .
+      dockerfile: microservices/pricing/Dockerfile
+
+    container_name: pricing-service
+
+    ports:
+      - "8002:8000"
+
+    environment:
+      SERVICE_NAME: pricing-service
+      ENVIRONMENT: dev
+      LOG_LEVEL: INFO
+      DEFAULT_CURRENCY: INR
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+
+  fraud:
+    build:
+      context: .
+      dockerfile: microservices/fraud/Dockerfile
+
+    container_name: fraud-service
+
+    ports:
+      - "8003:8000"
+
+    environment:
+      SERVICE_NAME: fraud-service
+      ENVIRONMENT: dev
+      LOG_LEVEL: INFO
+
+      HIGH_VALUE_THRESHOLD: 100000
+      VELOCITY_THRESHOLD: 10
+      VELOCITY_AMOUNT_THRESHOLD: 500000
+
+      MEDIUM_RISK_THRESHOLD: 30
+      HIGH_RISK_THRESHOLD: 70
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  producer:
+    build:
+      context: .
+      dockerfile: docker/producer.Dockerfile
+    container_name: retail-event-producer
+
+    environment:
+      ENVIRONMENT: dev
+      EVENTS_PER_SECOND: "5"
+
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_CLIENT_ID: retail-event-producer
+      KAFKA_ACKS: all
+      KAFKA_RETRIES: "10"
+      KAFKA_BATCH_SIZE: "65536"
+      KAFKA_LINGER_MS: "10"
+      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_ENABLE_IDEMPOTENCE: "true"
+
+      KAFKA_TOPIC_ORDERS: orders
+      KAFKA_TOPIC_PAYMENTS: payments
+      KAFKA_TOPIC_INVENTORY: inventory
+      KAFKA_TOPIC_CUSTOMER_ACTIVITY: customer_activity
+
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+    networks:
+      - default
+
+
+
+networks:
+  retail-platform:
+    driver: bridge
+
+volumes:
+  kafka_data:

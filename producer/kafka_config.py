@@ -19,39 +19,18 @@ class KafkaConfig:
         "all",
     )
 
-    retries: int = int(
-        os.getenv(
-            "KAFKA_RETRIES",
-            "10",
-        )
-    )
+    retries: int = int(os.getenv("KAFKA_RETRIES", "10"))
 
-    batch_size: int = int(
-        os.getenv(
-            "KAFKA_BATCH_SIZE",
-            "65536",
-        )
-    )
+    batch_size: int = int(os.getenv("KAFKA_BATCH_SIZE", "65536"))
 
-    linger_ms: int = int(
-        os.getenv(
-            "KAFKA_LINGER_MS",
-            "10",
-        )
-    )
+    linger_ms: int = int(os.getenv("KAFKA_LINGER_MS", "10"))
 
     compression_type: str = os.getenv(
         "KAFKA_COMPRESSION_TYPE",
         "lz4",
     )
 
-    enable_idempotence: bool = (
-        os.getenv(
-            "KAFKA_ENABLE_IDEMPOTENCE",
-            "true",
-        ).lower()
-        == "true"
-    )
+    enable_idempotence: bool = os.getenv("KAFKA_ENABLE_IDEMPOTENCE", "true").lower() == "true"
 
     topic_orders: str = os.getenv(
         "KAFKA_TOPIC_ORDERS",
@@ -73,10 +52,15 @@ class KafkaConfig:
         "customer_activity",
     )
 
+    orders_topic: str = "orders"
+    payments_topic: str = "payments"
+    inventory_topic: str = "inventory"
+    customer_activity_topic: str = "customer_activity"
+
     def topics(self) -> tuple[str, ...]:
         return (
-            self.topic_orders,
-            self.topic_payments,
-            self.topic_inventory,
-            self.topic_customer_activity,
+            self.orders_topic,
+            self.payments_topic,
+            self.inventory_topic,
+            self.customer_activity_topic,
         )
