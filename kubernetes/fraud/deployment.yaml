@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraud-service
+  namespace: retail-platform
+  labels:
+    app: fraud-service
+    app.kubernetes.io/part-of: enterprise-retail-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fraud-service
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: fraud-service
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: fraud
+          image: retail-platform/fraud:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: SERVICE_NAME
+              value: fraud-service
+            - name: ENVIRONMENT
+              value: dev
+            - name: LOG_LEVEL
+              value: INFO
+            - name: HIGH_VALUE_THRESHOLD
+              value: "100000"
+            - name: VELOCITY_THRESHOLD
+              value: "10"
+            - name: VELOCITY_AMOUNT_THRESHOLD
+              value: "500000"
+            - name: MEDIUM_RISK_THRESHOLD
+              value: "30"
+            - name: HIGH_RISK_THRESHOLD
+              value: "70"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fraud-service
+  namespace: retail-platform
+spec:
+  type: ClusterIP
+  selector:
+    app: fraud-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
