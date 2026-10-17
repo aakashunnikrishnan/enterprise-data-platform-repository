@@ -1,0 +1,24 @@
+resource_group_name = "rg-retail-platform-dev"
+
+# Replace with a globally unique namespace name.
+namespace_name = "retail-platform-events-dev-12345"
+
+sku      = "Standard"
+capacity = 1
+
+auto_inflate_enabled     = true
+maximum_throughput_units = 4
+
+partition_count       = 2
+message_retention_days = 1
+
+consumer_groups = [
+  "aks-consumers",
+  "fabric-ingestion",
+]
+
+tags = {
+  project     = "retail-platform"
+  environment = "dev"
+  managed_by  = "terraform"
+}
