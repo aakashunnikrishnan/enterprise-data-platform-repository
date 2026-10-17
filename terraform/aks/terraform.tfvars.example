@@ -1,0 +1,18 @@
+project_name        = "retail-platform"
+environment         = "dev"
+location            = "centralindia"
+resource_group_name = "rg-retail-platform-dev"
+
+node_count   = 1
+node_vm_size = "Standard_D2s_v5"
+
+vnet_address_space          = ["10.20.0.0/16"]
+aks_subnet_address_prefixes = ["10.20.1.0/24"]
+
+log_retention_days = 30
+
+tags = {
+  project     = "retail-platform"
+  environment = "dev"
+  managed_by  = "terraform"
+}
